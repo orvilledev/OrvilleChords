@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { X, Check } from "lucide-react";
 import { SongViewer } from "./SongViewer";
 import { Button } from "./ui/Button";
+import { diatonicChords } from "@/lib/chords/keys";
 import type { NewSong } from "@/lib/data/repository";
 
 type Initial = {
@@ -14,8 +15,6 @@ type Initial = {
   tags: string[];
   body: string;
 };
-
-const QUICK_CHORDS = ["G", "C", "D", "Em", "Am", "A", "E", "F", "Bm", "D7", "G7", "A7"];
 
 export function SongEditor({
   heading,
@@ -38,6 +37,10 @@ export function SongEditor({
   const bodyRef = useRef<HTMLTextAreaElement>(null);
 
   const canSave = title.trim().length > 0 && !saving;
+  const quickChords = useMemo(
+    () => diatonicChords(originalKey.trim() || "C"),
+    [originalKey],
+  );
 
   function insertChord(chord: string) {
     const el = bodyRef.current;
@@ -133,15 +136,19 @@ export function SongEditor({
 
       {tab === "edit" ? (
         <div className="flex flex-1 flex-col px-4 pb-6">
+          <p className="mb-1 text-xs text-muted">
+            Chords in {originalKey.trim() || "C"}
+          </p>
           <div className="my-2 flex gap-1.5 overflow-x-auto pb-1">
-            {QUICK_CHORDS.map((c) => (
+            {quickChords.map(({ roman, chord }) => (
               <button
-                key={c}
+                key={roman}
                 type="button"
-                onClick={() => insertChord(c)}
-                className="flex-none rounded-lg bg-surface-2 px-3 py-1.5 font-mono text-sm text-chord active:bg-border"
+                onClick={() => insertChord(chord)}
+                className="flex flex-none flex-col items-center rounded-lg bg-surface-2 px-3 py-1.5 active:bg-border"
               >
-                {c}
+                <span className="font-mono text-sm text-chord">{chord}</span>
+                <span className="text-[10px] leading-none text-muted">{roman}</span>
               </button>
             ))}
           </div>

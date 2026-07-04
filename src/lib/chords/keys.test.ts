@@ -7,6 +7,7 @@ import {
   transposeKeyName,
   normalizeKey,
   keyList,
+  diatonicChords,
 } from "./keys";
 
 describe("keyToPitch", () => {
@@ -93,5 +94,36 @@ describe("normalizeKey / keyList", () => {
     expect(keyList(false)).toHaveLength(12);
     expect(keyList(false)).toContain("Bb");
     expect(keyList(true)).toContain("F#m");
+  });
+});
+
+describe("diatonicChords", () => {
+  it("returns the correct triads for G major, plus the V7", () => {
+    const chords = diatonicChords("G").map((c) => c.chord);
+    expect(chords).toEqual(["G", "Am", "Bm", "C", "D", "Em", "F#dim", "D7"]);
+  });
+
+  it("spells with flats for a flat key", () => {
+    const chords = diatonicChords("F").map((c) => c.chord);
+    expect(chords).toEqual(["F", "Gm", "Am", "Bb", "C", "Dm", "Edim", "C7"]);
+  });
+
+  it("returns natural-minor triads for a minor key", () => {
+    const result = diatonicChords("Am");
+    expect(result.map((c) => c.chord)).toEqual(["Am", "Bdim", "C", "Dm", "Em", "F", "G", "E7"]);
+    // The added dominant 7th is a borrowed major dominant, so its label stays uppercase.
+    expect(result.at(-1)).toEqual({ roman: "V7", chord: "E7" });
+  });
+
+  it("labels scale degrees with roman numerals", () => {
+    const romans = diatonicChords("C").map((c) => c.roman);
+    expect(romans).toEqual(["I", "ii", "iii", "IV", "V", "vi", "vii°", "V7"]);
+  });
+
+  it("falls back to C major for an empty or invalid key", () => {
+    expect(diatonicChords("").map((c) => c.chord)).toEqual(diatonicChords("C").map((c) => c.chord));
+    expect(diatonicChords("nonsense").map((c) => c.chord)).toEqual(
+      diatonicChords("C").map((c) => c.chord),
+    );
   });
 });

@@ -76,3 +76,46 @@ export function normalizeKey(key: string): string {
   if (!root) return key;
   return (root.minor ? MINOR_BY_PITCH : MAJOR_BY_PITCH)[root.pitch];
 }
+
+export type DiatonicChord = { roman: string; chord: string };
+
+// Semitone offsets of each scale degree from the tonic, and the triad quality
+// built on that degree (major/minor/diminished), for the two modes we support.
+const MAJOR_STEPS = [0, 2, 4, 5, 7, 9, 11];
+const MAJOR_QUALITIES = ["", "m", "m", "", "", "m", "dim"];
+const MAJOR_ROMANS = ["I", "ii", "iii", "IV", "V", "vi", "vii°"];
+
+const MINOR_STEPS = [0, 2, 3, 5, 7, 8, 10];
+const MINOR_QUALITIES = ["m", "dim", "", "m", "m", "", ""];
+const MINOR_ROMANS = ["i", "ii°", "III", "iv", "v", "VI", "VII"];
+
+/**
+ * The chords that diatonically belong to a key, e.g. "G" -> G, Am, Bm, C, D,
+ * Em, F#dim, plus the dominant 7th (D7) commonly used for cadences.
+ * Falls back to C major for an empty/unparseable key so the palette is never blank.
+ */
+export function diatonicChords(key: string): DiatonicChord[] {
+  const root = parseKeyRoot(key);
+  if (!root) return diatonicChords("C");
+
+  const accidental = accidentalForKey(key);
+  const notes = accidental === "b" ? FLAT_NOTES : SHARP_NOTES;
+  const steps = root.minor ? MINOR_STEPS : MAJOR_STEPS;
+  const qualities = root.minor ? MINOR_QUALITIES : MAJOR_QUALITIES;
+  const romans = root.minor ? MINOR_ROMANS : MAJOR_ROMANS;
+
+  const triads = steps.map((step, i) => ({
+    roman: romans[i],
+    chord: notes[mod12(root.pitch + step)] + qualities[i],
+  }));
+
+  // Add the dominant 7th (built on scale degree 5) — the most common chord
+  // beyond the plain triads, used constantly for cadences in worship music.
+  // Always a major-flavored dominant (borrowed from harmonic minor when the
+  // key is minor), so the label is always uppercase "V7" regardless of mode.
+  const dominantStep = steps[4];
+  const dominant = notes[mod12(root.pitch + dominantStep)] + "7";
+  triads.push({ roman: "V7", chord: dominant });
+
+  return triads;
+}
