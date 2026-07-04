@@ -50,7 +50,11 @@ export function SongViewer({
 
 function LyricLine({ words, hasChords }: { words: LyricWord[]; hasChords: boolean }) {
   return (
-    <div className="flex flex-wrap items-end">
+    // gap-x guarantees a minimum visual break between words even when a word's
+    // own trailing space is narrower than the chord glyph above it (common on
+    // chord-only lines like an intro/interlude, where words would otherwise
+    // butt together since chord and lyric text stack, not add, in width).
+    <div className="flex flex-wrap items-end gap-x-1">
       {words.map((word, wi) => (
         // A whole word stays on one line; wrapping happens only between words.
         <span key={wi} className="inline-flex whitespace-pre">
