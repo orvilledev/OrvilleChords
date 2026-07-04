@@ -36,14 +36,32 @@ export default function ImportSongPage() {
     [],
   );
 
-  function addFiles(list: FileList | null) {
-    if (!list) return;
-    const next = Array.from(list)
+  function addFiles(files: File[]) {
+    const next = files
       .filter((f) => f.type.startsWith("image/"))
       .map((file) => ({ file, url: URL.createObjectURL(file) }));
-    setPicked((prev) => [...prev, ...next]);
+    if (next.length > 0) setPicked((prev) => [...prev, ...next]);
     if (inputRef.current) inputRef.current.value = "";
   }
+
+  // Let users paste screenshots straight from the clipboard (Ctrl/Cmd+V).
+  const stageRef = useRef(stage);
+  stageRef.current = stage;
+  useEffect(() => {
+    function onPaste(e: ClipboardEvent) {
+      if (stageRef.current !== "pick") return;
+      const files = Array.from(e.clipboardData?.items ?? [])
+        .filter((item) => item.kind === "file" && item.type.startsWith("image/"))
+        .map((item) => item.getAsFile())
+        .filter((f): f is File => f !== null);
+      if (files.length > 0) {
+        e.preventDefault();
+        addFiles(files);
+      }
+    }
+    window.addEventListener("paste", onPaste);
+    return () => window.removeEventListener("paste", onPaste);
+  }, []);
 
   function removeFile(index: number) {
     setPicked((prev) => {
@@ -147,8 +165,8 @@ export default function ImportSongPage() {
           Chord chart screenshots <span className="text-danger">*</span>
         </span>
         <p className="mb-2 text-xs text-muted">
-          Upload screenshots with chords written above the lyrics. If the song spans
-          several screenshots, add them in order.
+          Upload or paste (Ctrl+V) screenshots with chords written above the lyrics.
+          If the song spans several screenshots, add them in order.
         </p>
 
         {picked.length > 0 && (
@@ -181,7 +199,7 @@ export default function ImportSongPage() {
           accept="image/*"
           multiple
           className="hidden"
-          onChange={(e) => addFiles(e.target.files)}
+          onChange={(e) => addFiles(Array.from(e.target.files ?? []))}
         />
         {!reading && (
           <button
@@ -190,7 +208,7 @@ export default function ImportSongPage() {
             className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-surface py-6 text-sm font-medium text-muted active:bg-surface-2"
           >
             <ImagePlus className="h-5 w-5" />
-            {picked.length === 0 ? "Add screenshots" : "Add more screenshots"}
+            {picked.length === 0 ? "Add or paste screenshots" : "Add more screenshots"}
           </button>
         )}
       </div>
