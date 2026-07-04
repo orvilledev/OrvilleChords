@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Search, Plus, Music, LogOut } from "lucide-react";
+import { Search, Plus, Music, User } from "lucide-react";
 import { useSongs } from "@/lib/data/SongsProvider";
 import { useAuth } from "@/lib/auth/AuthProvider";
 
 export default function LibraryPage() {
   const { songs, loading } = useSongs();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -32,14 +32,14 @@ export default function LibraryPage() {
           </p>
         </div>
         {user && (
-          <button
-            onClick={() => signOut()}
-            title={`Sign out (${user.email})`}
-            aria-label="Sign out"
+          <Link
+            href="/account"
+            title={user.email ?? "Account"}
+            aria-label="Account"
             className="flex h-10 w-10 flex-none items-center justify-center rounded-lg text-muted hover:text-foreground"
           >
-            <LogOut className="h-5 w-5" />
-          </button>
+            <User className="h-5 w-5" />
+          </Link>
         )}
       </header>
 
