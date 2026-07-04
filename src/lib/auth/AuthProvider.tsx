@@ -15,7 +15,8 @@ type AuthContextValue = {
   user: User | null;
   loading: boolean;
   configured: boolean;
-  signInWithEmail: (email: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, displayName?: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -46,21 +47,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => unsub?.();
   }, []);
 
-  const signInWithEmail = useCallback(async (email: string) => {
-    const { error } = await getSupabase().auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.origin },
-    });
+  const signIn = useCallback(async (email: string, password: string) => {
+    const { error } = await getSupabase().auth.signInWithPassword({ email, password });
     if (error) throw error;
   }, []);
+
+  const signUp = useCallback(
+    async (email: string, password: string, displayName?: string) => {
+      const { error } = await getSupabase().auth.signUp({
+        email,
+        password,
+        options: displayName ? { data: { display_name: displayName } } : undefined,
+      });
+      if (error) throw error;
+    },
+    [],
+  );
 
   const signOut = useCallback(async () => {
     await getSupabase().auth.signOut();
   }, []);
 
   const value = useMemo(
-    () => ({ user, loading, configured: isSupabaseConfigured, signInWithEmail, signOut }),
-    [user, loading, signInWithEmail, signOut],
+    () => ({ user, loading, configured: isSupabaseConfigured, signIn, signUp, signOut }),
+    [user, loading, signIn, signUp, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

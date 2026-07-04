@@ -109,7 +109,10 @@ Goal: the team signs in from their phones, installs the app, and songs work offl
 - [x] Magic-link email sign-in (no passwords) — `AuthProvider` + gate; OTP send verified (200)
 - [x] Swap data layer from IndexedDB to Supabase; one-time migration of local songs
       (`supabaseSongRepository` / `supabaseSetlistRepository` behind the same interfaces)
-- [ ] Push to GitHub; connect Vercel for auto-deploy on every push
+- [x] Push to GitHub (`orvilledev/OrvilleChords`, private) + deploy to Vercel
+      → **https://orvillechords.vercel.app** (env vars set; Supabase auth URLs updated)
+  - [ ] Optional: connect the GitHub repo in the Vercel dashboard for auto-deploy on push
+        (needs a one-time GitHub login connection; today deploys are via CLI)
 - [ ] **PWA:**
   - [ ] Web app manifest (name, icons, standalone display) — installable to home screen
   - [ ] Serwist service worker: cache app shell + song library for offline use
