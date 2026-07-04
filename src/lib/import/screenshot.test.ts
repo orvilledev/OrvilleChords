@@ -113,6 +113,32 @@ describe("ocrLinesToChordPro", () => {
     expect(body).toContain("{start_of_chorus}");
   });
 
+  it("guesses F for an F/Bb/C/Dm song even when C is frequent", () => {
+    // "At the Cross": every chord is diatonic to F (I IV V vi); C alone
+    // can't explain the Bb, so frequency ties must not win.
+    const { keyGuess } = ocrLinesToChordPro([
+      [
+        line(0, ["F", 0], ["Bb", 4], ["C", 14], ["Dm", 22]),
+        line(20, ["Oh", 0], ["Lord", 3], ["You've", 8], ["searched", 15], ["me", 24]),
+        line(40, ["F", 0], ["Bb", 4], ["C", 13]),
+        line(60, ["You", 0], ["know", 4], ["my", 9], ["way", 12]),
+        line(80, ["Bb", 0], ["C", 10]),
+        line(100, ["I", 0], ["know", 3], ["You", 8], ["love", 12], ["me", 17]),
+      ],
+    ]);
+    expect(keyGuess).toBe("F");
+  });
+
+  it("keeps the chart's spelling for sharp/flat tonics", () => {
+    const { keyGuess } = ocrLinesToChordPro([
+      [
+        line(0, ["F#", 0], ["B", 6], ["C#", 12], ["D#m", 18]),
+        line(20, ["la", 0], ["la", 4], ["la", 8], ["la", 12]),
+      ],
+    ]);
+    expect(keyGuess).toBe("F#");
+  });
+
   it("guesses the key from chord frequency and endpoints", () => {
     const { keyGuess } = ocrLinesToChordPro([
       [

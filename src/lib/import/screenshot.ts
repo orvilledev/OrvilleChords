@@ -207,17 +207,65 @@ function linesToRows(lines: OcrLine[]): Row[] {
   return rows;
 }
 
+const PITCH: Record<string, number> = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+const KEY_NAMES = ["C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"];
+
+function pitchClass(root: string): number {
+  let pc = PITCH[root[0]];
+  if (root[1] === "#") pc += 1;
+  if (root[1] === "b") pc -= 1;
+  return ((pc % 12) + 12) % 12;
+}
+
+/**
+ * Score each major key by how well its diatonic chords (I ii iii IV V vi)
+ * explain the chords in the song. Frequency alone fails in keys like F, where
+ * the V (C) can appear as often as the tonic — but only F explains F/Bb/C/Dm.
+ */
 function guessKey(body: string): string {
-  const chords = [...body.matchAll(/\[([A-G][#b]?m?)/g)].map((m) => m[1]);
+  const chords = [...body.matchAll(/\[([A-G][#b]?)(m(?!aj))?/g)].map((m) => ({
+    pc: pitchClass(m[1]),
+    minor: m[2] !== undefined,
+    name: m[1],
+  }));
   if (chords.length === 0) return "";
+
   const counts = new Map<string, number>();
-  for (const c of chords) counts.set(c, (counts.get(c) ?? 0) + 1);
-  // Bonus for opening and closing chords — they usually mark the tonic.
-  counts.set(chords[0], (counts.get(chords[0]) ?? 0) + 2);
-  counts.set(chords[chords.length - 1], (counts.get(chords[chords.length - 1]) ?? 0) + 1);
-  let best = chords[0];
-  for (const [chord, n] of counts) if (n > (counts.get(best) ?? 0)) best = chord;
-  return best;
+  for (const c of chords) {
+    const id = `${c.pc}:${c.minor ? "m" : ""}`;
+    counts.set(id, (counts.get(id) ?? 0) + 1);
+  }
+
+  let bestKey = 0;
+  let bestScore = -1;
+  for (let key = 0; key < 12; key++) {
+    // [interval from tonic, minor?, weight]
+    const degrees: [number, boolean, number][] = [
+      [0, false, 3], // I
+      [5, false, 2], // IV
+      [7, false, 2], // V
+      [9, true, 1.5], // vi
+      [2, true, 1], // ii
+      [4, true, 1], // iii
+    ];
+    let score = 0;
+    for (const [interval, minor, weight] of degrees) {
+      const id = `${(key + interval) % 12}:${minor ? "m" : ""}`;
+      score += (counts.get(id) ?? 0) * weight;
+    }
+    const first = chords[0];
+    const last = chords[chords.length - 1];
+    if (!first.minor && first.pc === key) score += 3;
+    if (!last.minor && last.pc === key) score += 2;
+    if (score > bestScore) {
+      bestScore = score;
+      bestKey = key;
+    }
+  }
+
+  // Prefer the spelling the chart itself uses for the tonic (e.g. F# vs Gb).
+  const asWritten = chords.find((c) => c.pc === bestKey && !c.minor);
+  return asWritten?.name ?? KEY_NAMES[bestKey];
 }
 
 /**
