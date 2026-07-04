@@ -15,8 +15,12 @@ type AuthContextValue = {
   user: User | null;
   loading: boolean;
   configured: boolean;
+  /** True while the user arrived via a password-recovery link and must set a new password. */
+  recovery: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, displayName?: string) => Promise<void>;
+  sendPasswordReset: (email: string) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -25,6 +29,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [recovery, setRecovery] = useState(false);
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -32,19 +37,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     const sb = getSupabase();
-    let unsub: (() => void) | undefined;
-
-    (async () => {
-      const { data } = await sb.auth.getSession();
-      setUser(data.session?.user ?? null);
+    // Registering the listener first ensures we catch the PASSWORD_RECOVERY
+    // event that fires when a recovery link in the URL is processed.
+    const { data: listener } = sb.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+      if (event === "PASSWORD_RECOVERY") setRecovery(true);
       setLoading(false);
-      const { data: listener } = sb.auth.onAuthStateChange((_event, session) => {
-        setUser(session?.user ?? null);
-      });
-      unsub = () => listener.subscription.unsubscribe();
-    })();
-
-    return () => unsub?.();
+    });
+    return () => listener.subscription.unsubscribe();
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
@@ -64,13 +64,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
+  const sendPasswordReset = useCallback(async (email: string) => {
+    const { error } = await getSupabase().auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin,
+    });
+    if (error) throw error;
+  }, []);
+
+  const updatePassword = useCallback(async (password: string) => {
+    const { error } = await getSupabase().auth.updateUser({ password });
+    if (error) throw error;
+    setRecovery(false);
+  }, []);
+
   const signOut = useCallback(async () => {
+    setRecovery(false);
     await getSupabase().auth.signOut();
   }, []);
 
   const value = useMemo(
-    () => ({ user, loading, configured: isSupabaseConfigured, signIn, signUp, signOut }),
-    [user, loading, signIn, signUp, signOut],
+    () => ({
+      user,
+      loading,
+      configured: isSupabaseConfigured,
+      recovery,
+      signIn,
+      signUp,
+      sendPasswordReset,
+      updatePassword,
+      signOut,
+    }),
+    [user, loading, recovery, signIn, signUp, sendPasswordReset, updatePassword, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

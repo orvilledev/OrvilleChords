@@ -2,9 +2,10 @@
 
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { SignIn } from "./SignIn";
+import { ResetPassword } from "./ResetPassword";
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
-  const { user, loading, configured } = useAuth();
+  const { user, loading, configured, recovery } = useAuth();
 
   if (!configured) {
     return (
@@ -22,6 +23,9 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   if (loading) {
     return <div className="flex min-h-[70vh] items-center justify-center text-muted">Loading…</div>;
   }
+
+  // A recovery link signs the user in, but force the new-password step first.
+  if (recovery) return <ResetPassword />;
 
   if (!user) return <SignIn />;
 
