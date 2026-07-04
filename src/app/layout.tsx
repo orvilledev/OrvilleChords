@@ -12,14 +12,14 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: { default: "OrvilleChords", template: "%s · OrvilleChords" },
+  title: { default: "ChordRealm", template: "%s · ChordRealm" },
   description: "Chords and lyrics for worship songs.",
-  applicationName: "OrvilleChords",
+  applicationName: "ChordRealm",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "OrvilleChords",
+    title: "ChordRealm",
   },
   icons: {
     icon: "/icons/icon-192.png",

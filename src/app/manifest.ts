@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "OrvilleChords",
-    short_name: "OrvilleChords",
+    name: "ChordRealm",
+    short_name: "ChordRealm",
     description: "Chords and lyrics for worship songs.",
     start_url: "/",
     display: "standalone",

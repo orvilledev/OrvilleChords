@@ -63,7 +63,7 @@ export function SignIn() {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent text-accent-foreground">
             <Music className="h-7 w-7" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">OrvilleChords</h1>
+          <h1 className="text-2xl font-bold tracking-tight">ChordRealm</h1>
           <p className="mt-2 text-sm text-muted">{subtitle}</p>
         </div>
 

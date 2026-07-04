@@ -1,5 +1,5 @@
-/* OrvilleChords service worker — offline shell + song caching. */
-const VERSION = "v1";
+/* ChordRealm service worker — offline shell + song caching. */
+const VERSION = "v2";
 const STATIC_CACHE = `oc-static-${VERSION}`;
 const DATA_CACHE = `oc-data-${VERSION}`;
 const DOC_CACHE = `oc-docs-${VERSION}`;

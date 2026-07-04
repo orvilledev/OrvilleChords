@@ -1,5 +1,5 @@
 @echo off
-title OrvilleChords Dev Server
+title ChordRealm Dev Server
 cd /d "%~dp0"
 
 where npm >nul 2>nul
@@ -19,7 +19,7 @@ if not exist node_modules (
 
 echo.
 echo   ============================================
-echo     Starting OrvilleChords
+echo     Starting ChordRealm
 echo     Your browser will open at localhost:3000
 echo     Keep this window open while using the app.
 echo     Close it (or press Ctrl+C) to stop.

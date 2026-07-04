@@ -1,4 +1,6 @@
-# OrvilleChords — Build Plan
+# ChordRealm — Build Plan
+
+*(formerly OrvilleChords; GitHub repo and deploy URL still use the old name.)*
 
 A mobile-first web app for worship song chords and lyrics, for Orville and his worship team.
 

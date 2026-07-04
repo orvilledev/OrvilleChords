@@ -26,7 +26,7 @@ export default function LibraryPage() {
     <div className="px-4 pt-6">
       <header className="mb-4 flex items-start justify-between gap-2">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">OrvilleChords</h1>
+          <h1 className="text-2xl font-bold tracking-tight">ChordRealm</h1>
           <p className="text-sm text-muted">
             {songs.length} song{songs.length === 1 ? "" : "s"} in your library
           </p>
