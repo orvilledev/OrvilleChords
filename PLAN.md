@@ -113,13 +113,17 @@ Goal: the team signs in from their phones, installs the app, and songs work offl
       → **https://orvillechords.vercel.app** (env vars set; Supabase auth URLs updated)
   - [ ] Optional: connect the GitHub repo in the Vercel dashboard for auto-deploy on push
         (needs a one-time GitHub login connection; today deploys are via CLI)
-- [ ] **PWA:**
-  - [ ] Web app manifest (name, icons, standalone display) — installable to home screen
-  - [ ] Serwist service worker: cache app shell + song library for offline use
+- [x] **PWA:**
+  - [x] Web app manifest + generated icons (192/512/maskable, apple-touch), standalone display — installable to home screen
+  - [x] Service worker (`public/sw.js`): cache app shell, Next assets, and Supabase song reads for offline use (hand-rolled; registers in production only)
   - [x] Screen Wake Lock while performing (added in stage mode, Phase 5)
-- [ ] Verify on real phones: install, sign in, airplane-mode test
+- [ ] Verify on real phones: install, sign in, airplane-mode test *(manual — over to you)*
 
-**Done when:** a team member can sign in on their phone, add the app to their home screen, and read every song with no connection. *(Auth + shared cloud DB done & wired; deploy + PWA remain.)*
+**Done when:** a team member can sign in on their phone, add the app to their home screen, and read every song with no connection. ✅ **Built & deployed — final airplane-mode check on a real phone is yours to do.**
+
+### Also shipped (not in the original plan)
+- Auth switched from magic link to **email + password** (+ email confirmation off, so signup needs no email).
+- **Password reset** flow ("Forgot password?" + recovery screen).
 
 ---
 

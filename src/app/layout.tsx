@@ -6,6 +6,7 @@ import { AuthGate } from "@/components/AuthGate";
 import { SongsProvider } from "@/lib/data/SongsProvider";
 import { SetlistsProvider } from "@/lib/data/SetlistsProvider";
 import { BottomNav } from "@/components/BottomNav";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -14,6 +15,16 @@ export const metadata: Metadata = {
   title: { default: "OrvilleChords", template: "%s · OrvilleChords" },
   description: "Chords and lyrics for worship songs.",
   applicationName: "OrvilleChords",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "OrvilleChords",
+  },
+  icons: {
+    icon: "/icons/icon-192.png",
+    apple: "/icons/apple-touch-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
@@ -29,6 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <ServiceWorkerRegister />
         <AuthProvider>
           <AuthGate>
             <SongsProvider>
