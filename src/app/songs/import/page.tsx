@@ -11,6 +11,7 @@ import {
   recognizeChartImages,
   type OcrProgress,
 } from "@/lib/import/screenshot";
+import { MAJOR_BY_PITCH, MINOR_BY_PITCH } from "@/lib/chords/keys";
 
 type Picked = { file: File; url: string };
 
@@ -21,6 +22,7 @@ export default function ImportSongPage() {
   const [stage, setStage] = useState<"pick" | "reading" | "review">("pick");
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState("");
+  const [originalKey, setOriginalKey] = useState(""); // "" = auto-detect from chords
   const [picked, setPicked] = useState<Picked[]>([]);
   const [progress, setProgress] = useState<OcrProgress | null>(null);
   const [error, setError] = useState("");
@@ -101,7 +103,7 @@ export default function ImportSongPage() {
         initial={{
           title,
           artist,
-          originalKey: result.keyGuess,
+          originalKey: originalKey || result.keyGuess,
           tags: ["worship"],
           body: result.body,
         }}
@@ -148,16 +150,43 @@ export default function ImportSongPage() {
             className={inputClass}
           />
         </label>
-        <label className="block">
-          <span className="mb-1 block text-xs font-medium text-muted">Artist</span>
-          <input
-            value={artist}
-            onChange={(e) => setArtist(e.target.value)}
-            placeholder="Author / band"
-            disabled={reading}
-            className={inputClass}
-          />
-        </label>
+        <div className="flex gap-3">
+          <label className="block flex-1">
+            <span className="mb-1 block text-xs font-medium text-muted">Artist</span>
+            <input
+              value={artist}
+              onChange={(e) => setArtist(e.target.value)}
+              placeholder="Author / band"
+              disabled={reading}
+              className={inputClass}
+            />
+          </label>
+          <label className="block w-36">
+            <span className="mb-1 block text-xs font-medium text-muted">Original Key</span>
+            <select
+              value={originalKey}
+              onChange={(e) => setOriginalKey(e.target.value)}
+              disabled={reading}
+              className={inputClass}
+            >
+              <option value="">Auto-detect</option>
+              <optgroup label="Major">
+                {MAJOR_BY_PITCH.map((k) => (
+                  <option key={k} value={k}>
+                    {k}
+                  </option>
+                ))}
+              </optgroup>
+              <optgroup label="Minor">
+                {MINOR_BY_PITCH.map((k) => (
+                  <option key={k} value={k}>
+                    {k}
+                  </option>
+                ))}
+              </optgroup>
+            </select>
+          </label>
+        </div>
       </div>
 
       <div className="px-4 pt-4">

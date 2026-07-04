@@ -5,7 +5,13 @@ import { useRouter } from "next/navigation";
 import { X, Check } from "lucide-react";
 import { SongViewer } from "./SongViewer";
 import { Button } from "./ui/Button";
-import { diatonicChords } from "@/lib/chords/keys";
+import {
+  MAJOR_BY_PITCH,
+  MINOR_BY_PITCH,
+  diatonicChords,
+  normalizeKey,
+  parseKeyRoot,
+} from "@/lib/chords/keys";
 import type { NewSong } from "@/lib/data/repository";
 
 type Initial = {
@@ -30,7 +36,11 @@ export function SongEditor({
   const router = useRouter();
   const [title, setTitle] = useState(initial?.title ?? "");
   const [artist, setArtist] = useState(initial?.artist ?? "");
-  const [originalKey, setOriginalKey] = useState(initial?.originalKey ?? "");
+  const [originalKey, setOriginalKey] = useState(() => {
+    const k = initial?.originalKey ?? "";
+    // Re-spell legacy free-text keys (e.g. "Gb") into the canonical picker names.
+    return parseKeyRoot(k) ? normalizeKey(k) : "";
+  });
   const [tags, setTags] = useState(initial?.tags.join(", ") ?? "");
   const [body, setBody] = useState(initial?.body ?? "");
   const [tab, setTab] = useState<"edit" | "preview">("edit");
@@ -106,13 +116,28 @@ export function SongEditor({
               className={inputClass}
             />
           </Field>
-          <Field label="Key" className="w-24">
-            <input
+          <Field label="Original Key" className="w-32">
+            <select
               value={originalKey}
               onChange={(e) => setOriginalKey(e.target.value)}
-              placeholder="G"
               className={inputClass}
-            />
+            >
+              <option value="">—</option>
+              <optgroup label="Major">
+                {MAJOR_BY_PITCH.map((k) => (
+                  <option key={k} value={k}>
+                    {k}
+                  </option>
+                ))}
+              </optgroup>
+              <optgroup label="Minor">
+                {MINOR_BY_PITCH.map((k) => (
+                  <option key={k} value={k}>
+                    {k}
+                  </option>
+                ))}
+              </optgroup>
+            </select>
           </Field>
         </div>
         <Field label="Tags">
