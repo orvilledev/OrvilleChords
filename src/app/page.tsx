@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Search, Plus, Music, User } from "lucide-react";
+import { Search, Plus, Music, User, ImagePlus } from "lucide-react";
 import { useSongs } from "@/lib/data/SongsProvider";
 import { useAuth } from "@/lib/auth/AuthProvider";
 
@@ -83,6 +83,13 @@ export default function LibraryPage() {
         </ul>
       )}
 
+      <Link
+        href="/songs/import"
+        aria-label="Import song from screenshot"
+        className="fixed bottom-[10.5rem] right-4 z-30 flex h-12 w-12 items-center justify-center rounded-full border border-border bg-surface text-accent shadow-lg transition active:scale-95"
+      >
+        <ImagePlus className="h-6 w-6" />
+      </Link>
       <Link
         href="/songs/new"
         aria-label="Add song"
