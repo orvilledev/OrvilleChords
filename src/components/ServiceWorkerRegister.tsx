@@ -15,13 +15,11 @@ export function ServiceWorkerRegister() {
     ) {
       return;
     }
-    const onLoad = () => {
-      navigator.serviceWorker.register("/sw.js").catch(() => {
-        /* registration is best-effort */
-      });
-    };
-    window.addEventListener("load", onLoad);
-    return () => window.removeEventListener("load", onLoad);
+    // The effect runs after mount (post-load), so register directly — waiting on
+    // the window "load" event would miss it since load has already fired.
+    navigator.serviceWorker.register("/sw.js").catch(() => {
+      /* registration is best-effort */
+    });
   }, []);
 
   return null;
