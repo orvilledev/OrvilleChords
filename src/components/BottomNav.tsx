@@ -15,7 +15,7 @@ const tabs = [
   },
   {
     href: "/setlists",
-    label: "Sets",
+    label: "Create Lineup",
     icon: ListMusic,
     match: (p: string) => p.startsWith("/setlists"),
   },
