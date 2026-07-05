@@ -93,28 +93,13 @@ export async function buildDeck(song: Song, options: SlideOptions = {}): Promise
   return pptx;
 }
 
-/** Build one deck for a whole setlist: a cover slide, then each song in order. */
+/** Build one deck for a whole setlist: each song in order (no title slide). */
 export async function buildSetlistDeck(
   name: string,
   songs: Song[],
   options: SlideOptions = {},
 ): Promise<Pptx> {
   const pptx = await newPptx(name);
-
-  const cover = pptx.addSlide();
-  cover.background = { color: BLACK };
-  cover.addText(name || "Setlist", {
-    x: 0.5,
-    y: 0,
-    w: 12.33,
-    h: 7.5,
-    align: "center",
-    valign: "middle",
-    color: WHITE,
-    fontSize: 54,
-    bold: true,
-  });
-  addFooter(cover, options.footer);
 
   for (const song of songs) addSongSlides(pptx, song, options);
   return pptx;
